@@ -1,0 +1,92 @@
+swagger: '2.0'
+info:
+  title: 1194_jsonToxml_Gatewayscript
+  x-ibm-name: 1194_jsontoxml_gatewayscript
+  version: 1.0.0
+x-ibm-configuration:
+  cors:
+    enabled: true
+  gateway: datapower-api-gateway
+  type: rest
+  phase: realized
+  enforced: true
+  testable: true
+  assembly:
+    execute:
+      - gatewayscript:
+          version: 2.0.0
+          title: gatewayscript
+          source: |
+            // Load required modules
+            var apim = require('apim');
+            var converter = require('json-xml-converter');
+
+            try {
+                // Get the input JSON object
+                var inputJson = apim.getvariable('request.body');
+
+                // Create BadgerFish structure
+                var badgerfishJson = { root: {} };
+
+                for (var key in inputJson) {
+                    if (inputJson.hasOwnProperty(key)) {
+                        // Ensure all values are strings (as expected in XML)
+                        badgerfishJson.root[key] = { "$": String(inputJson[key]) };
+                    }
+                }
+
+                // Convert JSON (BadgerFish) to XML
+                var xmlDoc = converter.toXML('badgerfish', badgerfishJson);
+
+                // Set XML response
+                apim.setvariable('message.body', xmlDoc);
+                apim.setvariable('message.headers.content-type', 'application/xml');
+            } catch (e) {
+                // Error handling
+                apim.setvariable('message.status.code', 500);
+                apim.setvariable('message.body', JSON.stringify({
+                    error: 'JSON to XML conversion failed',
+                    message: e.message
+                }));
+            }
+  properties:
+    target-url:
+      value: http://example.com/operation-name
+      description: The URL of the target service
+      encoded: false
+  activity-log:
+    enabled: true
+    success-content: activity
+    error-content: payload
+basePath: /1194_jsontoxml_gatewayscript
+paths:
+  /:
+    post:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+      parameters:
+        - name: body
+          schema:
+            title: root
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+          in: body
+securityDefinitions:
+  clientID:
+    type: apiKey
+    in: header
+    name: X-IBM-Client-Id
+    x-key-type: client_id
+security:
+  - clientID: []
+schemes:
+  - https

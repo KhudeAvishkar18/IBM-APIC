@@ -1,0 +1,117 @@
+swagger: '2.0'
+info:
+  title: 1194-JWT-API
+  x-ibm-name: 1194-jwt-api
+  version: 1.0.0
+x-ibm-configuration:
+  cors:
+    enabled: true
+  gateway: datapower-api-gateway
+  type: rest
+  phase: realized
+  enforced: true
+  testable: true
+  assembly:
+    execute:
+      - set-variable:
+          version: 2.0.0
+          title: set-variable
+          actions:
+            - set: key
+              value: >-
+                {     "kty": "oct",     "use": "sig",     "k":
+                "30z9mPl_hiux8nkG_2JgnbB99TWBBBNVprs87yeQ9vMAZz7MlKmzsDVxZp9a_vpgzBQh2PcYVYNdmnekDxOxdTqWPFzfGLIEljDNA3vx-D0Xr_7OpbflZ79Chns6PrSkpje6QH_ou4OMofk4UTExe8Ucp-wqnBJaiF7tCrjp5iQmZ_AQ4KVcdLJwObAEEkflVQ11V2ZF0-CoUdeXISdmxrhuVRG83sv27lZvr3uGNRcEVc_xJmmP_M4-_NPPi_R_qvY0Gm0Ro4sAgUe_pi1nEkuPq62SNu6f2NG0-2IvZjlqbn9mQmjYWMkwkuGOoVlWLKfm3yXXFarDmmQ_1xvKdQ",    
+                "alg": "HS256" }
+              type: string
+      - jwt-generate:
+          version: 2.1.0
+          title: jwt-generate
+          jwt: message.body
+          iss-claim: request.headers.iss-claim
+          exp-claim: 3600
+          aud-claim: request.headers.aud-claim
+          jws-jwk: key
+          jws-alg: HS256
+      - jwt-validate:
+          version: 2.0.0
+          title: jwt-validate
+          jwt: request.headers.authorization
+          output-claims: message.body
+          aud-claim: request.headers.aud-claim
+          jws-jwk: key
+  properties:
+    target-url:
+      value: http://example.com/operation-name
+      description: The URL of the target service
+      encoded: false
+  activity-log:
+    enabled: true
+    success-content: activity
+    error-content: payload
+basePath: /1194-jwt-api
+paths:
+  /:
+    get:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+      parameters:
+        - name: iss-claim
+          in: header
+          type: string
+        - name: aud-claim
+          in: header
+          type: string
+    put:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    post:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    delete:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    head:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    patch:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+securityDefinitions:
+  clientID:
+    type: apiKey
+    in: header
+    name: X-IBM-Client-Id
+security:
+  - clientID: []
+schemes:
+  - https

@@ -1,0 +1,78 @@
+swagger: '2.0'
+info:
+  title: 1194-TimestampTask-API
+  x-ibm-name: 1194-timestamptask-api
+  version: 1.0.0
+x-ibm-configuration:
+  cors:
+    enabled: true
+  gateway: datapower-api-gateway
+  type: rest
+  phase: realized
+  enforced: true
+  testable: true
+  assembly:
+    execute:
+      - gatewayscript:
+          version: 2.0.0
+          title: gatewayscript
+          source: |+
+            var apim = require('apim');
+
+            var bod = apim.getvariable('request.body');
+
+            var currentHour = apim.getvariable('system.time.hour');
+
+            if (currentHour >= 9 && currentHour < 16) {
+              apim.setvariable('message.body', bod);
+            } else {
+              apim.setvariable('message.status.code', 403);
+              var resp = {
+                'eCode': 403,
+                'eMessage': "Not allowed to access at this time"
+              };
+              
+              apim.setvariable('message.body', JSON.stringify(resp));
+            }
+
+
+  properties:
+    target-url:
+      value: http://example.com/operation-name
+      description: The URL of the target service
+      encoded: false
+  activity-log:
+    enabled: true
+    success-content: activity
+    error-content: payload
+basePath: /1194-timestamptask-api
+paths:
+  /:
+    post:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+      parameters:
+        - name: body
+          schema:
+            title: root
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+          in: body
+securityDefinitions:
+  clientID:
+    type: apiKey
+    in: header
+    name: X-IBM-Client-Id
+security:
+  - clientID: []
+schemes:
+  - https

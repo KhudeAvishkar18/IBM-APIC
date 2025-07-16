@@ -1,0 +1,64 @@
+swagger: '2.0'
+info:
+  title: 1194-ThrowErrorTask-API
+  x-ibm-name: 1194-throwerrortask-api
+  version: 1.0.0
+x-ibm-configuration:
+  cors:
+    enabled: true
+  gateway: datapower-api-gateway
+  type: rest
+  phase: realized
+  enforced: true
+  testable: true
+  assembly:
+    execute:
+      - gatewayscript:
+          version: 2.0.0
+          title: gatewayscript
+          source: "// Code for checking AADHAARID is null or not\n\n// var apim = require('apim');\n \n// var reqBody = apim.getvariable('request.body');\n// var adId = reqBody.AADHAARID;\n \n// if(!adId || adId.trim()===\"\" || adId === null){\n//   apim.setvariable('message.status.code', 400);\n//   var errorResponse = {\n//         \"eCode\": \"400\",\n//         \"eMessage\": \"AADHAARID is missing\"\n//   };\n//   var eRes = JSON.stringify(errorResponse);\n  \n//   apim.setvariable('message.body', eRes);\n//   return;\n// }\n\n\n\n// Code for converting dateformat\n\nvar apim = require('apim');\n\_\nvar reqBody = apim.getvariable('request.body');\n\_\nfunction convertDateFormat(dateString){\n\_\_var parts = dateString.split('/');\n\_\_if(parts.length === 3){\n\_\_  var newDate = parts[2]+'-'+parts[1]+'-'+parts[0];\n\_\_\_\_return newDate;\n\_\_} else {\n\_\_\_\_return dateString;\n\_\_}\n}\n\_\nif(reqBody.BIRTHDATE){\n\_\_reqBody.BIRTHDATE = convertDateFormat(reqBody.BIRTHDATE);\n}\n\_\nif(reqBody.BIRTHTIME){\n\_\_reqBody.BIRTHTIME = convertDateFormat(reqBody.BIRTHTIME);\n}\n\_\napim.setvariable('message.body', reqBody);\n\n"
+  properties:
+    target-url:
+      value: http://example.com/operation-name
+      description: The URL of the target service
+      encoded: false
+  activity-log:
+    enabled: true
+    success-content: activity
+    error-content: payload
+basePath: /1194-throwerrortask-api
+paths:
+  /:
+    post:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+      parameters:
+        - name: body
+          schema:
+            title: root
+            type: object
+            properties:
+              AADHAARTYPE: {}
+              PANNUMBER: {}
+              STATE: {}
+              AADHAARID:
+                type: string
+              NAME: {}
+              BIRTHDATE: {}
+              BIRTHTIME: {}
+              PHONENUMBER: {}
+          in: body
+securityDefinitions:
+  clientID:
+    type: apiKey
+    in: header
+    name: X-IBM-Client-Id
+security:
+  - clientID: []
+schemes:
+  - https

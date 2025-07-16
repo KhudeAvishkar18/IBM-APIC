@@ -1,0 +1,187 @@
+swagger: '2.0'
+info:
+  title: 1194_CRUD_API
+  x-ibm-name: 1194_crud_api
+  version: 1.0.0
+x-ibm-configuration:
+  cors:
+    enabled: true
+  gateway: datapower-api-gateway
+  type: rest
+  phase: realized
+  enforced: true
+  testable: true
+  assembly:
+    execute:
+      - gatewayscript:
+          version: 2.0.0
+          title: gatewayscript
+          source: >
+            // Import required modules
+
+            var apim = require('apim');
+
+            var urlopen = require('urlopen');
+
+            var hm = require('header-metadata');
+
+
+            // Get the method and input
+
+            var method = apim.getvariable('request.verb'); // GET, POST, PUT,
+            DELETE
+
+            var input = apim.getvariable('request.body');
+
+            var apiUrl1 = 'http://192.168.1.74:7800/select';
+
+            var apiUrl2 = 'http://192.168.1.74:7800/insert';
+
+            var apiUrl3 = 'http://192.168.1.74:7800/update';
+
+            var apiUrl4 = 'http://192.168.1.74:7800/delete';
+
+
+            var apiUrl = 'http://192.168.1.74:7800/select';
+
+            if(method === 'get'){
+              apiUrl = apiUrl1;
+            }
+
+            else if(method === 'post')
+
+            {
+              apiUrl = apiUrl2;
+            }
+
+            else if(method === 'put'){
+              apiUrl = apiUrl3;
+            }
+
+            else if(method === 'delete')
+
+            {
+              apiUrl = apiUrl4;
+            }
+
+            else{
+              apiUrl = null;
+            }
+
+
+            // Set Content-Type
+
+            hm.response.set('content-type', 'application/json');
+
+
+            // Define common options structure
+
+            var options = {
+                target: apiUrl,
+                method: method,
+                timeout: 60,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                // Add body only for POST and PUT
+                data: (method === 'POST' || method === 'PUT') ? input : null
+            };
+
+
+            // Append ID for GET/PUT/DELETE if path has it
+
+            // if ((method === 'GET' || method === 'PUT' || method ===
+            'DELETE')) {
+
+            //     var id = apim.getvariable('request.path.id'); // You must
+            extract from path, e.g. /records/{id}
+
+            //     options.target += '/' + id;
+
+            // }
+
+
+            // Call backend
+
+            urlopen.open(options, function(error, response) {
+                if (error) {
+                    session.output.write({ error: 'Connection failed', details: error });
+                } else {
+                    response.readAsJSON(function(err, data) {
+                        if (err) {
+                            session.output.write({ error: 'Invalid response from backend', details: err });
+                        } else {
+                            session.output.write(data);
+                        }
+                    });
+                }
+            });
+  properties:
+    target-url:
+      value: http://example.com/operation-name
+      description: The URL of the target service
+      encoded: false
+  activity-log:
+    enabled: true
+    success-content: activity
+    error-content: payload
+basePath: /1194_crud_api
+paths:
+  /:
+    get:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    put:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    post:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    delete:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    head:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    patch:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+securityDefinitions:
+  clientID:
+    type: apiKey
+    in: header
+    name: X-IBM-Client-Id
+security:
+  - clientID: []
+schemes:
+  - https
