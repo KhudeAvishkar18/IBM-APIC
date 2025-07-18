@@ -1,0 +1,153 @@
+swagger: '2.0'
+info:
+  title: 1194_Jose
+  x-ibm-name: 1194_jose
+  version: 1.0.0
+x-ibm-configuration:
+  cors:
+    enabled: true
+  gateway: datapower-api-gateway
+  type: rest
+  phase: realized
+  enforced: true
+  testable: true
+  assembly:
+    execute:
+      - operation-switch:
+          version: 2.0.0
+          title: operation-switch
+          case:
+            - operations:
+                - verb: post
+                  path: /encryption
+              execute:
+                - gatewayscript:
+                    version: 2.0.0
+                    title: gatewayscript
+                    source: >-
+                      var apim = require('apim');
+
+                      var jose = require('jose');
+                       
+                      var bod = apim.getvariable('request.body');
+
+                      var bodyy = JSON.stringify(bod);
+                       
+                      var pubKey = {
+                        kty: "RSA",
+                        n: "v_ydjBTyPad-oTXUQojbrlV-AAt0-Upu9wrVSzXB5ZzYSL-Jreo6PME56JgYf7DpvWMZxjqcQRStPj440O2cS8Eu7LDKKRiFZovh7GRrhn5n4x6K_wqrwMuGrerGqPJggEZzlHZkBSosW5WDMREnjNBuKlbGo6CV-yaImS5y3iAZoPPAgggLzml87K5O1-QbVa66Hf-XNwRPoCKpsZ5AyA8tY34C-wScCQKs449WbpwIgDJOEQCHX6lnLrhhagzqWXibipNor-VlQ-1eGcBYy7bSX_8LuUvySk1MAT8RfVxtz8u2u7J4xXYEiz4xVoZtMWZN1e_fqeZwM6iO_xZ7xQ",
+                        e: "AQAB",
+                        alg: "RSA1_5",
+                        use: "enc"
+                      };
+                       
+                      var jweHdr = jose.createJWEHeader('A128CBC-HS256');
+
+                      jweHdr.setProtected('alg', 'RSA1_5');
+
+                      jweHdr.setKey(pubKey);
+
+                      jose.createJWEEncrypter(jweHdr).update(bodyy).encrypt('compact',
+                      function(error, jweObj) {
+                        if (error) {
+                          session.output.write(error);
+                        } else {
+                          apim.setvariable('message.body', jweObj)
+                        }
+                      });
+            - operations:
+                - verb: post
+                  path: /decryption
+              execute:
+                - gatewayscript:
+                    version: 2.0.0
+                    title: gatewayscript
+                    source: >-
+                      var apim = require('apim');
+
+                      var jose = require('jose');
+                       
+                      var key = {
+                          "p": "3kBwMPx-BexpOTn0NurOblBf9FSnY47mp4MfLqwqJ1OhQ0Z170ufQonfLrw2lJ0T8mNnypHf9XuIteNxZH3GjQwH7o2e70fUTSRhLCHT1gAnUYWMuCxrBNWlbhjZkOq9bBCrKQfYoYGKHEatDGLoa7afJ52JSP85d-tyXZUhT7k",
+                          "kty": "RSA",
+                          "q": "3SOxQGO_T4HvGyIrP70sxhyomMyQpkAZXHWB1PhZrkyabtLMoERfmoijCPtkL0WVB0B_bv8rfkApZOUDhnCjwXg2bWzRC_mJcN1BP7UVLKfoHkPNIKRcAtdlzg0eIyeMwH08aA5dj9of43wRsYah5JcU1NyZ1GZWFh2XTkwk2m0",
+                          "d": "GCZ62wg3gLH1J-pRjR0SJVfzxaWrTUCjvMfMFO3qOiwEuQH_G7V_Je1Yj32ydz2V6ZDxyRHOXhFvyYiiNQXux0jB0lxa0diXz1KBVO8852o3P0a0TWjWOiZgBrilzNLQeNJj76UE5_FqKwsfuahixT_i28iWrDajJzitrjc9k9tWF2iNM78AOg1ugOC3KS-u_E0LE7E2hIMl0Shp7vQHzra3p5ra5fePEgsOsjzNwnUMxYFcTsxRcCrHnYWW_e5yk9wD6unJ9kFyNNCgsO_NkiaYLEMTqFQv_yA0Rm0vvyxIsTU11x9PDGvxnhcKOgdsyue_fEDBnz8erCXYhAOUgQ",
+                          "e": "AQAB",
+                          "use": "enc",
+                          "qi": "BgYKnQLfQxn5kF1bYw_3VAk1Qb1mdD1wwafykX-U7jSa_VVsEwXB0axqFvAuYKT-BqN0lmaH4E98J9xFqrqhJEFHhgudBMwFwFTshBFScMjRm7phXPkxNmV4xlT_5INCmFZAB3-gPXrhSh1KIHh_PZtEeAZnZMiiVqc0ZfJcntY",
+                          "dp": "WRIoJGm8s_EIRqgESNIXwzwxCIG4x_yoUfAJ2jGjfzlUAttFPo7nF8qbiGZj1XGSYe0W1qdZw08r_gFWG3kQzsxIjYFydeEqo3P2AbLY7AYJu_Ey8UjT5w8ciqAo6Zw6KAoSHpKHbkq1KBnnFnS5QxngdQb80yV-SaIxpnGy9Pk",
+                          "alg": "RSA1_5",
+                          "dq": "Z2hnXIrITS-fVfrWaonVxBZmqH0QLw3OTjQMsEAp_52GocglM9SFOEgopOyZXpmVJLz-WjMsbW8nbCzDRzyo9rF2EhlOb-ESahqshlPxQN6LZouiAl-ZPyLmUkJEE4BNCz4E30vIaJpBSykbRP6F-dTEQv2dWXs5SkIwHMbyfMk",
+                          "n": "v_ydjBTyPad-oTXUQojbrlV-AAt0-Upu9wrVSzXB5ZzYSL-Jreo6PME56JgYf7DpvWMZxjqcQRStPj440O2cS8Eu7LDKKRiFZovh7GRrhn5n4x6K_wqrwMuGrerGqPJggEZzlHZkBSosW5WDMREnjNBuKlbGo6CV-yaImS5y3iAZoPPAgggLzml87K5O1-QbVa66Hf-XNwRPoCKpsZ5AyA8tY34C-wScCQKs449WbpwIgDJOEQCHX6lnLrhhagzqWXibipNor-VlQ-1eGcBYy7bSX_8LuUvySk1MAT8RfVxtz8u2u7J4xXYEiz4xVoZtMWZN1e_fqeZwM6iO_xZ7xQ"
+                      };
+                       
+                      var bodyy = apim.getvariable('message.body');
+
+                      var jweobj = jose.parse(bodyy);
+                       
+                      jweobj.setKey(key);
+                       
+                      jose.createJWEDecrypter(jweobj).decrypt(function(error,
+                      plaintext) {
+                          if (error) {
+                              session.output.write("jwe decrypt fail: "+error);
+                          } else {
+                              session.output.write(plaintext);
+                          }
+                      });
+          otherwise: []
+  properties:
+    target-url:
+      value: http://example.com/operation-name
+      description: The URL of the target service
+      encoded: false
+  activity-log:
+    enabled: true
+    success-content: activity
+    error-content: payload
+basePath: /1194_jose
+paths:
+  /decryption:
+    post:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      parameters:
+        - name: body
+          schema:
+            title: root
+            type: string
+            properties: {}
+          in: body
+  /encryption:
+    post:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+      parameters:
+        - name: body
+          required: true
+          schema:
+            title: root
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+          in: body
+securityDefinitions:
+  clientID:
+    type: apiKey
+    in: header
+    name: X-IBM-Client-Id
+security:
+  - clientID: []
+schemes:
+  - https

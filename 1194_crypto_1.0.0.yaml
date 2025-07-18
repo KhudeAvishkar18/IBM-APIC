@@ -1,0 +1,148 @@
+swagger: '2.0'
+info:
+  title: 1194_Crypto
+  x-ibm-name: 1194_crypto
+  version: 1.0.0
+x-ibm-configuration:
+  cors:
+    enabled: true
+  gateway: datapower-api-gateway
+  type: rest
+  phase: realized
+  enforced: true
+  testable: true
+  assembly:
+    execute:
+      - gatewayscript:
+          version: 2.0.0
+          title: gatewayscript
+          source: >-
+            var crypto = require('crypto');
+             
+            // Hardcoded 32-byte key (16 bytes AES + 16 bytes HMAC)
+
+            var key = Buffer.from('0123456789abcdef0123456789abcdef', 'utf8');
+            // 32 bytes
+             
+            // Hardcoded 16-byte IV
+
+            var iv = Buffer.from('1234567890abcdef', 'utf8'); // 16 bytes
+             
+            // Additional Authenticated Data
+
+            var aad = Buffer.from('additional authentication data', 'utf8');
+             
+            // Plaintext to encrypt
+
+            var plaintext = 'this is the plaintext that needs to be encrypted';
+             
+            // ------------------ ENCRYPT ------------------
+             
+            var cipher = crypto.createCipheriv('A128CBC-HS256', key, iv);
+
+            cipher.setAAD(aad);
+
+            cipher.update(plaintext);
+
+            var ciphertext = cipher.final();
+
+            var authTag = cipher.getAuthTag();
+             
+            // Base64 encode outputs
+
+            var ciphertextB64 = ciphertext.toString('base64');
+
+            var authTagB64 = authTag.toString('base64');
+
+            var ivB64 = iv.toString('base64');
+             
+            // session.output.write('Encrypted message (base64): ' +
+            ciphertextB64 + '\n');
+
+            // session.output.write('AuthTag (base64): ' + authTagB64 + '\n');
+
+            // session.output.write('IV (base64): ' + ivB64 + '\n');
+             
+            // ------------------ DECRYPT ------------------
+             
+            try {
+              var decipher = crypto.createDecipheriv('A128CBC-HS256', key, iv);
+              decipher.setAAD(aad);
+              decipher.setAuthTag(authTag);
+              decipher.update(ciphertext);
+              var decrypted = decipher.final();
+             
+              session.output.write('Decrypted message: ' + decrypted.toString() + '\n' + 
+              'Encrypted message (base64): ' + ciphertextB64 + '\n');
+            } catch (err) {
+              session.output.write('Error during decryption: ' + err.message + '\n');
+            }
+  properties:
+    target-url:
+      value: http://example.com/operation-name
+      description: The URL of the target service
+      encoded: false
+  activity-log:
+    enabled: true
+    success-content: activity
+    error-content: payload
+basePath: /1194_crypto
+paths:
+  /:
+    get:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    put:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    post:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    delete:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    head:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    patch:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+securityDefinitions:
+  clientID:
+    type: apiKey
+    in: header
+    name: X-IBM-Client-Id
+security:
+  - clientID: []
+schemes:
+  - https
