@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
-  title: 1194-Session-API
-  x-ibm-name: 1194-session-api
+  title: 1194_jsonToCsv_gatewayScript
+  x-ibm-name: 1194_jsonTocsv_gatewayScript
   version: 1.0.0
 x-ibm-configuration:
   cors:
@@ -17,18 +17,20 @@ x-ibm-configuration:
           version: 2.0.0
           title: gatewayscript
           source: |-
+            let apim = require('apim');
+            let jsonObj = apim.getvariable('request.body');
 
-            var apim = require('apim');
+            let csvStr = "";
 
-            var body = apim.getvariable('request.body');
-            var name = body.name;
+            // Extract headers and values from JSON object
+            let headers = Object.keys(jsonObj).join(",");
+            let values = Object.values(jsonObj).join(","); 
 
-            if (!name || name == null) {
-                session.reject('Variable name is missing or has no value.');
-              } 
-            else {
-                session.output.write('Hello World');
-              }
+            // Combine into CSV format
+            csvStr = headers + "\n" + values;
+
+            // Write output
+            session.output.write(csvStr);
   properties:
     target-url:
       value: http://example.com/operation-name
@@ -38,7 +40,7 @@ x-ibm-configuration:
     enabled: true
     success-content: activity
     error-content: payload
-basePath: /1194-session-api
+basePath: /1194_xmltocsv_mappolicy
 paths:
   /:
     post:
@@ -60,9 +62,6 @@ paths:
               name:
                 type: string
           in: body
-        - name: q
-          in: query
-          type: integer
 securityDefinitions:
   clientID:
     type: apiKey

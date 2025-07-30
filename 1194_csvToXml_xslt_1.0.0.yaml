@@ -1,0 +1,104 @@
+swagger: '2.0'
+info:
+  title: 1194_csvToXml_xslt
+  x-ibm-name: 1194_csvToXml_xslt
+  version: 1.0.0
+x-ibm-configuration:
+  cors:
+    enabled: true
+  gateway: datapower-api-gateway
+  type: rest
+  phase: realized
+  enforced: true
+  testable: true
+  assembly:
+    execute:
+      - parse:
+          version: 2.2.0
+          title: parse
+          parse-settings-reference:
+            default: apic-default-parsesettings
+      - xslt:
+          version: 2.1.0
+          title: xslt
+          input: false
+          serialize-output: false
+          source: |
+            <?xml version="1.0"?>
+            <xsl:stylesheet version="1.0"
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                
+                <xsl:output method="xml" indent="yes"/>
+
+                <xsl:template match="/">
+                    <employees>
+                        <!-- Line 2 -->
+                        <xsl:call-template name="parseLine">
+                            <xsl:with-param name="line" select="'John Doe,101,9876543210'" />
+                        </xsl:call-template>
+                        <!-- Line 3 -->
+                        <xsl:call-template name="parseLine">
+                            <xsl:with-param name="line" select="'Jane Smith,102,9123456780'" />
+                        </xsl:call-template>
+                        <!-- Line 4 -->
+                        <xsl:call-template name="parseLine">
+                            <xsl:with-param name="line" select="'Bob Ray,103,9988776655'" />
+                        </xsl:call-template>
+                    </employees>
+                </xsl:template>
+
+                <xsl:template name="parseLine">
+                    <xsl:param name="line"/>
+                    <xsl:variable name="name" select="substring-before($line, ',')" />
+                    <xsl:variable name="rest" select="substring-after($line, ',')" />
+                    <xsl:variable name="empid" select="substring-before($rest, ',')" />
+                    <xsl:variable name="phoneno" select="substring-after($rest, ',')" />
+                    <employee>
+                        <Name><xsl:value-of select="$name"/></Name>
+                        <EmpID><xsl:value-of select="$empid"/></EmpID>
+                        <PhoneNo><xsl:value-of select="$phoneno"/></PhoneNo>
+                    </employee>
+                </xsl:template>
+            </xsl:stylesheet>
+          compile-settings: {}
+  properties:
+    target-url:
+      value: http://example.com/operation-name
+      description: The URL of the target service
+      encoded: false
+  activity-log:
+    enabled: true
+    success-content: activity
+    error-content: payload
+basePath: /1194_xmltocsv_gatewayscript
+paths:
+  /:
+    post:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+      parameters:
+        - name: body
+          schema:
+            title: root
+            type: object
+            properties:
+              Id:
+                type: integer
+              Name:
+                type: integer
+          in: body
+securityDefinitions:
+  clientID:
+    type: apiKey
+    in: header
+    name: X-IBM-Client-Id
+security:
+  - clientID: []
+schemes:
+  - https
+consumes: []
