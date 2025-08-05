@@ -1,0 +1,87 @@
+swagger: '2.0'
+info:
+  title: REST_Calculator_api
+  version: 1.0.0
+  description: REST_Calculator_api
+  x-ibm-name: rest_calculator_api
+paths:
+  /post:
+    post:
+      operationId: postPost
+      responses:
+        '200':
+          description: The operation was successful.
+          schema:
+            $ref: '#/definitions/root'
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Insert a post
+      parameters:
+        - name: body
+          schema:
+            title: root
+            type: object
+            properties:
+              root:
+                $ref: '#/definitions/root'
+          in: body
+basePath: /rest_calculator_api/v1
+definitions:
+  root:
+    type: object
+    properties:
+      num1:
+        type: integer
+      num2:
+        type: integer
+    required:
+      - num1
+      - num2
+x-ibm-configuration:
+  cors:
+    enabled: true
+  properties:
+    target-url:
+      description: The URL of the target service
+      encoded: false
+      value: http://192.168.1.52:7800
+  phase: realized
+  enforced: true
+  gateway: datapower-api-gateway
+  assembly:
+    execute:
+      - invoke:
+          version: 2.0.0
+          title: invoke
+          backend-type: detect
+          header-control:
+            type: blocklist
+            values: []
+          parameter-control:
+            type: allowlist
+            values: []
+          timeout: 60
+          verb: keep
+          chunked-uploads: true
+          persistent-connection: true
+          target-url: $(target-url)$(request.path)
+          follow-redirects: false
+          inject-proxy-headers: true
+  type: rest
+  testable: true
+  activity-log:
+    enabled: true
+    success-content: activity
+    error-content: payload
+securityDefinitions:
+  clientID:
+    type: apiKey
+    in: header
+    name: X-IBM-Client-Id
+security:
+  - clientID: []
+host: $(catalog.host)
+schemes:
+  - https
